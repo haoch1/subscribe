@@ -1,9 +1,10 @@
 payload:
-  -DOMAIN-SUFFIX,tiangou.xyz
-  -DOMAIN-SUFFIX,xmsl.org
-  -DOMAIN-SUFFIX,imetyou.top
-  -DOMAIN-SUFFIX,raisemby.com
-  -DOMAIN-SUFFIX,micu.hk
-  -DOMAIN-SUFFIX,127255.best
-  -DOMAIN-SUFFIX,emby.blog
-  -DOMAIN-SUFFIX,roboemby.de
+  - DOMAIN-KEYWORD,emby
+  - DOMAIN-SUFFIX,tiangou.xyz
+  - DOMAIN-SUFFIX,xmsl.org
+  - DOMAIN-SUFFIX,imetyou.top
+  - DOMAIN-SUFFIX,raisemby.com
+  - DOMAIN-SUFFIX,micu.hk
+  - DOMAIN-SUFFIX,127255.best
+  - DOMAIN-SUFFIX,emby.blog
+  - DOMAIN-SUFFIX,roboemby.de
