@@ -39,7 +39,7 @@ rules:
   - RULE-SET,GlobalMedia,Proxies
   - RULE-SET,Apple,Proxies
   - RULE-SET,Github,Proxies
-  - RULE-SET,Microsoft,Proxies
+  - RULE-SET,Microsoft,DIRECT
   - RULE-SET,Google,Proxies
   - RULE-SET,Telegram,Proxies
   - RULE-SET,Twitter,Proxies
