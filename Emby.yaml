@@ -1,5 +1,6 @@
 payload:
   - DOMAIN-KEYWORD,emby
+  - DOMAIN-SUFFIX,as174.com
   - DOMAIN-SUFFIX,tiangou.xyz
   - DOMAIN-SUFFIX,xmsl.org
   - DOMAIN-SUFFIX,imetyou.top
