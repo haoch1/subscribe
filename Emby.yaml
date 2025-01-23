@@ -9,4 +9,3 @@ payload:
   - DOMAIN-SUFFIX,127255.best
   - DOMAIN-SUFFIX,emby.blog
   - DOMAIN-SUFFIX,roboemby.de
-  - IP-CIDR,185.163.116.145
