@@ -26,6 +26,7 @@ rule-providers:
   Twitter:     {behavior: classical, interval: 86400, format: yaml, type: http, url: https://ghp.ci/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.yaml ,                    path: ./ruleset/Twitter.yaml      }
   Game:        {behavior: classical, interval: 86400, format: yaml, type: http, url: https://ghp.ci/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/Game.yaml ,                          path: ./ruleset/Game.yaml         }
   ProxyLite:   {behavior: classical, interval: 86400, format: yaml, type: http, url: https://ghp.ci/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ProxyLite/ProxyLite.yaml ,                path: ./ruleset/ProxyLite.yaml    }
+  China:       {behavior: classical, interval: 86400, format: yaml, type: http, url: https://ghp.ci/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/China/China_Classical.yaml ,              path: ./ruleset/China.yaml        }
   Direct:      {behavior: classical, interval: 86400, format: yaml, type: http, url: https://ghp.ci/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Direct/Direct.yaml ,                      path: ./ruleset/Direct.yaml       }
   Lan:         {behavior: classical, interval: 86400, format: yaml, type: http, url: https://ghp.ci/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Lan/Lan.yaml ,                            path: ./ruleset/Lan.yaml          }
   Download:    {behavior: classical, interval: 86400, format: yaml, type: http, url: https://ghp.ci/https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Download/Download.yaml ,                  path: ./ruleset/Download.yaml     }
@@ -45,6 +46,7 @@ rules:
   - RULE-SET,Twitter,Proxies
   - RULE-SET,Game,Proxies
   - RULE-SET,ProxyLite,Proxies
+  - RULE-SET,China,DIRECT
   - RULE-SET,ChinaIP,DIRECT
   - RULE-SET,Direct,DIRECT
   - RULE-SET,Lan,DIRECT
