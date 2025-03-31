@@ -1,7 +1,7 @@
 proxy-groups:
 #分组
   - {name: Proxies, type: select, proxies: [HK, TW, SG, JP, US], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Proxy.png }
-  - {name: Emby, type: select, proxies: [DIRECT, HK, TW, SG, JP, US], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Emby.png }
+  - {name: Emby, type: select, proxies: [DIRECT, HK, TW, SG, JP, US, Final], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Emby.png }
   - {name: YouTube, type: select, proxies: [HK, TW, SG, JP, US], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/YouTube.png }
   - {name: HK, type: select, include-all: true, filter: "港|HK|(?i)Hong", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Hong_Kong.png }
   - {name: TW, type: select, include-all: true, filter: "台|湾|TW|(?i)Taiwan", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Taiwan.png }
