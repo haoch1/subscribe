@@ -19,6 +19,7 @@ rule-providers:
   Claude:      {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Claude/Claude.yaml ,           path: ./ruleset/Claude.yaml       }
   Gemini:      {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Gemini/Gemini.yaml ,           path: ./ruleset/Gemini.yaml       }  
   Emby:        {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/haoch1/subscribe/refs/heads/main/Emby.yaml ,                                             path: ./ruleset/Emby.yaml         }
+  Emby_direct: {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/haoch1/subscribe/refs/heads/main/Emby_direct.yaml ,                                      path: ./ruleset/Emby_direct.yaml  }
   GlobalMedia: {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia_Classical.yaml ,  path: ./ruleset/GlobalMedia.yaml  }
   Apple:       {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple_Classical.yaml ,              path: ./ruleset/Apple.yaml        }
   Github:      {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GitHub/GitHub.yaml ,                      path: ./ruleset/Github.yaml       }
@@ -55,5 +56,6 @@ rules:
   - RULE-SET,Direct,DIRECT
   - RULE-SET,Lan,DIRECT
   - RULE-SET,Download,DIRECT
+  - RULE-SET,Emby_direct,DIRECT
   - GEOIP,CN,DIRECT
   - MATCH,Final
