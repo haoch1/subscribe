@@ -1,6 +1,7 @@
 proxy-groups:
 #分组
   - {name: Proxies, type: select, proxies: [HK, TW, SG, JP, US], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Proxy.png }
+  - {name: AI, type: select, proxies: [HK, TW, SG, JP, US], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Final.png }
   - {name: Emby, type: select, proxies: [DIRECT, HK, TW, SG, JP, US, GLOBAL], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Emby.png }
   - {name: YouTube, type: select, proxies: [HK, TW, SG, JP, US], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/YouTube.png }
   - {name: HK, type: select, include-all: true, filter: "港|HK|(?i)Hong", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Hong_Kong.png }
@@ -15,9 +16,7 @@ proxy-groups:
 # 分流规则 
 rule-providers:
   AdBlock:     {behavior: domain,    interval: 86400, format: text, type: http, url: https://raw.githubusercontent.com/Cats-Team/AdRules/main/adrules_domainset.txt ,                                           path: ./ruleset/anti-ad-clash.txt }
-  OpenAi:      {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml ,                      path: ./ruleset/OpenAi.yaml       }
-  Claude:      {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Claude/Claude.yaml ,           path: ./ruleset/Claude.yaml       }
-  Gemini:      {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Gemini/Gemini.yaml ,           path: ./ruleset/Gemini.yaml       }  
+  AI:          {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/ddgksf2013/cb4121e8b5c5d865cc949cb8120320c4/raw/Ai.yaml ,                                path: ./ruleset/AI.yaml           }  
   Emby:        {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/haoch1/subscribe/refs/heads/main/Emby.yaml ,                                             path: ./ruleset/Emby.yaml         }
   Emby_direct: {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/haoch1/subscribe/refs/heads/main/Emby_direct.yaml ,                                      path: ./ruleset/Emby_direct.yaml  }
   GlobalMedia: {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia_Classical.yaml ,  path: ./ruleset/GlobalMedia.yaml  }
@@ -38,9 +37,7 @@ rule-providers:
 # 分流Policy 
 rules:
   - RULE-SET,AdBlock,REJECT
-  - RULE-SET,OpenAi,US
-  - RULE-SET,Claude,US
-  - RULE-SET,Gemini,US
+  - RULE-SET,AI,AI
   - RULE-SET,Emby,Emby
   - RULE-SET,GlobalMedia,Proxies
   - RULE-SET,Apple,Proxies
