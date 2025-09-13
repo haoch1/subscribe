@@ -6,7 +6,7 @@ proxy-groups:
   - {name: YouTube, type: select, proxies: [HK, TW, SG, JP, US], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/YouTube.png }
   - {name: HK, type: select, include-all: true, filter: "港|HK|(?i)Hong", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Hong_Kong.png }
   - {name: TW, type: select, include-all: true, filter: "台|湾|TW|(?i)Taiwan", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Taiwan.png }
-  - {name: SG, type: select, include-all: true, filter: "新|坡|SG|(?i)Singapore", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Singapore.png }
+  - {name: SG, type: select, include-all: true, filter: "新加坡|坡|SG|(?i)Singapore", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Singapore.png }
   - {name: JP, type: select, include-all: true, filter: "日|东京|JP|(?i)Japan", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Japan.png }
   - {name: US, type: select, include-all: true, filter: "美|US|(?i)States|American", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/United_States.png }
   - {name: Final, type: select, proxies: [Proxies, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Final.png }
