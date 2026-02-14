@@ -43,7 +43,7 @@ rules:
   - RULE-SET,Apple,Proxies
   - RULE-SET,Github,Proxies
   - RULE-SET,Microsoft,Proxies
-  - RULE-SET,Google,Proxies
+  - RULE-SET,Google,US
   - RULE-SET,Telegram,Proxies
   - RULE-SET,Twitter,Proxies
   - RULE-SET,Game,Proxies
