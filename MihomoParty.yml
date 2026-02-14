@@ -1,56 +1,230 @@
+# -------------------------------------------------------------------
+# 策略组 (Proxy Groups)
+# -------------------------------------------------------------------
 proxy-groups:
-#分组
-  - {name: Proxies, type: select, proxies: [HK, TW, SG, JP, US], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Proxy.png }
-  - {name: AI, type: select, proxies: [HK, TW, SG, JP, US], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Final.png }
-  - {name: Emby, type: select, proxies: [DIRECT], include-all: true, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Emby.png }
-  - {name: YouTube, type: select, proxies: [HK, TW, SG, JP, US], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/YouTube.png }
-  - {name: HK, type: select, include-all: true, filter: "港|HK|(?i)Hong", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Hong_Kong.png }
-  - {name: TW, type: select, include-all: true, filter: "台|湾|TW|(?i)Taiwan", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Taiwan.png }
-  - {name: SG, type: select, include-all: true, filter: "新加坡|坡|SG|(?i)Singapore", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Singapore.png }
-  - {name: JP, type: select, include-all: true, filter: "日|东京|JP|(?i)Japan", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Japan.png }
-  - {name: US, type: select, include-all: true, filter: "美|US|(?i)States|American", icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/United_States.png }
-  - {name: Final, type: select, proxies: [Proxies, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Final.png }
-  - {name: GLOBAL, type: select, include-all: true, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Global.png }
-  
+  - name: Proxies
+    type: select
+    proxies: [HK, TW, SG, JP, US]
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Proxy.png
 
-# 分流规则 
+  - name: AI
+    type: select
+    proxies: [HK, TW, SG, JP, US]
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Final.png
+
+  - name: YouTube
+    type: select
+    proxies: [HK, TW, SG, JP, US]
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/YouTube.png
+
+  - name: Emby
+    type: select
+    proxies: [DIRECT]
+    include-all: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Emby.png
+
+  - name: HK
+    type: select
+    include-all: true
+    filter: "港|HK|(?i)Hong"
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Hong_Kong.png
+
+  - name: TW
+    type: select
+    include-all: true
+    filter: "台|湾|TW|(?i)Taiwan"
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Taiwan.png
+
+  - name: SG
+    type: select
+    include-all: true
+    filter: "新加坡|坡|SG|(?i)Singapore"
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Singapore.png
+
+  - name: JP
+    type: select
+    include-all: true
+    filter: "日|东京|JP|(?i)Japan"
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Japan.png
+
+  - name: US
+    type: select
+    include-all: true
+    filter: "美|US|(?i)States|American"
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/United_States.png
+
+  - name: Final
+    type: select
+    proxies: [Proxies, DIRECT]
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Final.png
+
+  - name: GLOBAL
+    type: select
+    include-all: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Global.png
+
+# -------------------------------------------------------------------
+# 规则集 (Rule Providers)
+# -------------------------------------------------------------------
 rule-providers:
-  AdBlock:     {behavior: domain,    interval: 86400, format: text, type: http, url: https://raw.githubusercontent.com/Cats-Team/AdRules/main/adrules_domainset.txt ,                                           path: ./ruleset/anti-ad-clash.txt }
-  AI:          {behavior: classical, interval: 86400, format: yaml, type: http, url: https://ddgksf2013.top/filter/Ai.yaml ,                                                                                    path: ./ruleset/AI.yaml           }  
-  Emby:        {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/haoch1/subscribe/refs/heads/main/Emby.yaml ,                                             path: ./ruleset/Emby.yaml         }                                   path: ./ruleset/Emby_direct.yaml  }
-  GlobalMedia: {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia_Classical.yaml ,  path: ./ruleset/GlobalMedia.yaml  }
-  Apple:       {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple_Classical.yaml ,              path: ./ruleset/Apple.yaml        }
-  Github:      {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GitHub/GitHub.yaml ,                      path: ./ruleset/Github.yaml       }
-  Microsoft:   {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Microsoft/Microsoft.yaml ,                path: ./ruleset/Microsoft.yaml    }
-  Google:      {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Google/Google.yaml ,                      path: ./ruleset/Google.yaml       }
-  Telegram:    {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Telegram/Telegram.yaml ,                  path: ./ruleset/Telegram.yaml     }
-  Twitter:     {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.yaml ,                    path: ./ruleset/Twitter.yaml      }
-  Game:        {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/Game.yaml ,                          path: ./ruleset/Game.yaml         }
-  ProxyLite:   {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ProxyLite/ProxyLite.yaml ,                path: ./ruleset/ProxyLite.yaml    }
-  China:       {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/China/China_Classical.yaml ,              path: ./ruleset/China.yaml        }
-  Direct:      {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Direct/Direct.yaml ,                      path: ./ruleset/Direct.yaml       }
-  Lan:         {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Lan/Lan.yaml ,                            path: ./ruleset/Lan.yaml          }
-  Download:    {behavior: classical, interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Download/Download.yaml ,                  path: ./ruleset/Download.yaml     }
-  ChinaIP:     {behavior: ipcidr,    interval: 86400, format: yaml, type: http, url: https://raw.githubusercontent.com/soffchen/GeoIP2-CN/release/clash-rule-provider.yml ,                                     path: ./ruleset/ChinaIP.yaml      }
+  AdBlock:
+    type: http
+    behavior: domain
+    url: "https://raw.githubusercontent.com/Cats-Team/AdRules/main/adrules_domainset.txt"
+    path: ./ruleset/anti-ad-clash.txt
+    interval: 86400
 
-# 分流Policy 
+  AI:
+    type: http
+    behavior: classical
+    url: "https://ddgksf2013.top/filter/Ai.yaml"
+    path: ./ruleset/AI.yaml
+    interval: 86400
+
+  YouTube:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml"
+    path: ./ruleset/YouTube.yaml
+    interval: 86400
+
+  Emby:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/haoch1/subscribe/refs/heads/main/Emby.yaml"
+    path: ./ruleset/Emby.yaml
+    interval: 86400
+
+  GlobalMedia:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia_Classical.yaml"
+    path: ./ruleset/GlobalMedia.yaml
+    interval: 86400
+
+  Apple:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple_Classical.yaml"
+    path: ./ruleset/Apple.yaml
+    interval: 86400
+
+  Github:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GitHub/GitHub.yaml"
+    path: ./ruleset/Github.yaml
+    interval: 86400
+
+  Microsoft:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Microsoft/Microsoft.yaml"
+    path: ./ruleset/Microsoft.yaml
+    interval: 86400
+
+  Google:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Google/Google.yaml"
+    path: ./ruleset/Google.yaml
+    interval: 86400
+
+  Telegram:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Telegram/Telegram.yaml"
+    path: ./ruleset/Telegram.yaml
+    interval: 86400
+
+  Twitter:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.yaml"
+    path: ./ruleset/Twitter.yaml
+    interval: 86400
+
+  Game:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Game/Game.yaml"
+    path: ./ruleset/Game.yaml
+    interval: 86400
+
+  ProxyLite:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ProxyLite/ProxyLite.yaml"
+    path: ./ruleset/ProxyLite.yaml
+    interval: 86400
+
+  China:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/China/China_Classical.yaml"
+    path: ./ruleset/China.yaml
+    interval: 86400
+
+  Direct:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Direct/Direct.yaml"
+    path: ./ruleset/Direct.yaml
+    interval: 86400
+
+  Lan:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Lan/Lan.yaml"
+    path: ./ruleset/Lan.yaml
+    interval: 86400
+
+  Download:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Download/Download.yaml"
+    path: ./ruleset/Download.yaml
+    interval: 86400
+
+  ChinaIP:
+    type: http
+    behavior: ipcidr
+    url: "https://raw.githubusercontent.com/soffchen/GeoIP2-CN/release/clash-rule-provider.yml"
+    path: ./ruleset/ChinaIP.yaml
+    interval: 86400
+
+# -------------------------------------------------------------------
+# 分流规则 (Rules)
+# -------------------------------------------------------------------
 rules:
+  # 1. 拦截
   - RULE-SET,AdBlock,REJECT
+
+  # 2. 特殊服务
   - RULE-SET,AI,AI
   - RULE-SET,Emby,Emby
-  - RULE-SET,GlobalMedia,Proxies
-  - RULE-SET,Apple,Proxies
-  - RULE-SET,Github,Proxies
-  - RULE-SET,Microsoft,Proxies
-  - RULE-SET,Google,US
+  - RULE-SET,YouTube,YouTube
   - RULE-SET,Telegram,Proxies
   - RULE-SET,Twitter,Proxies
+
+  # 3. 基础设施
+  - RULE-SET,Github,Proxies
+  - RULE-SET,Google,US
+  - RULE-SET,Microsoft,Proxies
+  - RULE-SET,Apple,Proxies
+
+  # 4. 其他代理
+  - RULE-SET,GlobalMedia,Proxies
   - RULE-SET,Game,Proxies
   - RULE-SET,ProxyLite,Proxies
-  - RULE-SET,China,DIRECT
-  - RULE-SET,ChinaIP,DIRECT
-  - RULE-SET,Direct,DIRECT
+
+  # 5. 国内直连
   - RULE-SET,Lan,DIRECT
+  - RULE-SET,Direct,DIRECT
+  - RULE-SET,China,DIRECT
   - RULE-SET,Download,DIRECT
+  - RULE-SET,ChinaIP,DIRECT
   - GEOIP,CN,DIRECT
+
+  # 6. 兜底
   - MATCH,Final
