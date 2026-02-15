@@ -7,7 +7,7 @@ proxy-groups:
 
   - name: AI
     type: select
-    proxies: [HK, TW, SG, JP, US]
+    proxies: [US, HK, TW, SG, JP]
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/mini/Final.png
 
   - name: YouTube
