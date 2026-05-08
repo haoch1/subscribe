@@ -1,8 +1,8 @@
-name: Update ai.mrs without AWS Amazon
+name: Update AI YAML without AWS Amazon
 
 on:
   schedule:
-    # 每周一凌晨 4 点，按北京时间运行
+    # 每周一凌晨 4 点（北京时间）
     - cron: "0 4 * * 1"
       timezone: "Asia/Shanghai"
   workflow_dispatch:
@@ -18,66 +18,47 @@ jobs:
       - name: Checkout subscribe repo
         uses: actions/checkout@v5
 
-      - name: Download source ruleset text
+      - name: Download source ai.list
         run: |
           curl -fL \
-            "https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.list" \
+            "https://raw.githubusercontent.com/DustinWin/ruleset_geodata/mihomo-ruleset/ai.list" \
             -o ai-source.list
 
-      - name: Remove AWS and Amazon rules
+      - name: Generate filtered domain list
         run: |
-          grep -viE 'aws|amazon' ai-source.list > ai.list
+          tr '[:space:]' '\n' < ai-source.list \
+            | sed 's/\r$//' \
+            | sed '/^$/d' \
+            | sed 's/^+\.//' \
+            | grep -viE 'aws|amazon' \
+            | awk '!seen[$0]++' \
+            > ai-domain.list
 
-          echo "原始规则数量："
-          wc -l ai-source.list
+          echo "过滤后域名数量："
+          wc -l ai-domain.list
 
-          echo "过滤后规则数量："
-          wc -l ai.list
-
-          echo "被删除的规则："
-          grep -iE 'aws|amazon' ai-source.list || true
-
-      - name: Download latest mihomo
+      - name: Generate ai.yaml payload
         run: |
-          API_JSON="$(curl -fsSL https://api.github.com/repos/MetaCubeX/mihomo/releases/latest)"
+          {
+            echo "payload:"
+            awk '{print "  - DOMAIN-SUFFIX," $0}' ai-domain.list
+          } > ai.yaml
 
-          DOWNLOAD_URL="$(echo "$API_JSON" | jq -r '
-            .assets[]
-            | select(.name | test("^mihomo-linux-amd64-compatible-v.*\\.gz$"))
-            | .browser_download_url
-          ' | head -n 1)"
-
-          if [ -z "$DOWNLOAD_URL" ] || [ "$DOWNLOAD_URL" = "null" ]; then
-            DOWNLOAD_URL="$(echo "$API_JSON" | jq -r '
-              .assets[]
-              | select(.name | test("^mihomo-linux-amd64-v[0-9].*\\.gz$"))
-              | .browser_download_url
-            ' | head -n 1)"
-          fi
-
-          echo "Downloading: $DOWNLOAD_URL"
-          curl -fL "$DOWNLOAD_URL" -o mihomo.gz
-
-          gzip -d mihomo.gz
-          chmod +x mihomo
-          ./mihomo -v
-
-      - name: Convert to ai.mrs
-        run: |
-          ./mihomo convert-ruleset domain text ai.list ai.mrs
+          echo "生成后的前 30 行："
+          head -n 30 ai.yaml
 
       - name: Commit and push
         run: |
-          rm -f ai-source.list
+          rm -f ai-source.list ai-domain.list
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add ai.list ai.mrs
+          git add ai.yaml
 
           if git diff --cached --quiet; then
-            echo "ai.list 和 ai.mrs 没有变化，不提交。"
+            echo "ai.yaml 没有变化，不提交。"
           else
-            git commit -m "update ai ruleset without aws amazon"
+            git commit -m "update ai.yaml without aws amazon"
             git push
           fi
