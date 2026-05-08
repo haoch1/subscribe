@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout subscribe repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download source ruleset text
         run: |
@@ -26,13 +26,13 @@ jobs:
 
       - name: Remove AWS and Amazon rules
         run: |
-          grep -viE 'aws|amazon' ai-source.list > ai-filtered.list
+          grep -viE 'aws|amazon' ai-source.list > ai.list
 
           echo "原始规则数量："
           wc -l ai-source.list
 
           echo "过滤后规则数量："
-          wc -l ai-filtered.list
+          wc -l ai.list
 
           echo "被删除的规则："
           grep -iE 'aws|amazon' ai-source.list || true
@@ -64,20 +64,20 @@ jobs:
 
       - name: Convert to ai.mrs
         run: |
-          ./mihomo convert-ruleset domain text ai-filtered.list ai.mrs
+          ./mihomo convert-ruleset domain text ai.list ai.mrs
 
       - name: Commit and push
         run: |
-          rm -f ai-source.list ai-filtered.list
+          rm -f ai-source.list
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add ai.mrs
+          git add ai.list ai.mrs
 
           if git diff --cached --quiet; then
-            echo "ai.mrs 没有变化，不提交。"
+            echo "ai.list 和 ai.mrs 没有变化，不提交。"
           else
-            git commit -m "update ai.mrs without aws amazon"
+            git commit -m "update ai ruleset without aws amazon"
             git push
           fi
