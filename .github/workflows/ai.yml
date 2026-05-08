@@ -66,6 +66,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "ai.list 和 ai.yaml 没有变化，不提交。"
           else
-            git commit -m "update ai rules without aws amazon"
+            git commit -m "update ai rules"
             git push
           fi
