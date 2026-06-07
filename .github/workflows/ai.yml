@@ -2,8 +2,8 @@ name: Update AI Rules
 
 on:
   schedule:
-    # 每周一凌晨 4 点（北京时间）
-    - cron: "0 4 * * 1"
+    # 每周一凌晨 4:17（北京时间）
+    - cron: "17 4 * * 1"
       timezone: "Asia/Shanghai"
   workflow_dispatch:
 
