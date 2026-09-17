@@ -26,6 +26,8 @@ jobs:
 
       - name: Generate filtered domain list
         run: |
+          printf '\nwww.google.com\n' >> ai-source.list
+
           tr '[:space:]' '\n' < ai-source.list \
             | sed 's/\r$//' \
             | sed '/^$/d' \
