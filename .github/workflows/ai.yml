@@ -10,9 +10,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ai-rules-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout subscribe repo
@@ -20,28 +25,66 @@ jobs:
 
       - name: Download source ai.list
         run: |
-          curl -fL \
+          curl -fSL --retry 3 --connect-timeout 10 --max-time 60 \
             "https://raw.githubusercontent.com/DustinWin/ruleset_geodata/mihomo-ruleset/ai.list" \
             -o ai-source.list
 
-      - name: Generate filtered domain list
+      - name: Validate source and generate filtered rules
+        shell: python
         run: |
-          printf '\nwww.google.com\n' >> ai-source.list
+          import re
+          from pathlib import Path
 
-          tr '[:space:]' '\n' < ai-source.list \
-            | sed 's/\r$//' \
-            | sed '/^$/d' \
-            | sed 's/^+\.//' \
-            | grep -viE 'aws|amazon' \
-            | awk '!seen[$0]++' \
-            > ai-domain.list
+          label = r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?"
+          domain_pattern = re.compile(rf"(?:{label}\.)+{label}")
+          source_rules = []
 
-          echo "过滤后域名数量："
-          wc -l ai-domain.list
+          # 先校验所有上游条目，避免空文件或错误页面被当作规则提交。
+          source = Path("ai-source.list").read_text(encoding="utf-8-sig")
+          for line_number, line in enumerate(source.splitlines(), 1):
+              line = line.strip()
+              if not line or line.startswith("#"):
+                  continue
+              for entry in line.split():
+                  suffix = entry.startswith("+.")
+                  domain = entry[2:] if suffix else entry
+                  if (
+                      len(domain) > 253
+                      or not domain_pattern.fullmatch(domain)
+                      or domain.rsplit(".", 1)[-1].isdigit()
+                  ):
+                      raise SystemExit(f"上游第 {line_number} 行包含无效域名：{entry!r}")
+                  rule_type = "DOMAIN-SUFFIX" if suffix else "DOMAIN"
+                  source_rules.append((rule_type, domain))
+
+          if not source_rules:
+              raise SystemExit("上游没有有效域名，停止更新。")
+
+          # 保留现有 aws/amazon 关键字过滤和首次出现顺序。
+          rules = []
+          seen = set()
+          for rule_type, domain in source_rules:
+              if re.search(r"aws|amazon", domain, re.IGNORECASE):
+                  continue
+              rule = f"{rule_type},{domain}"
+              if rule not in seen:
+                  seen.add(rule)
+                  rules.append(rule)
+
+          if not rules:
+              raise SystemExit("上游规则过滤后为空，停止更新。")
+
+          # 自定义 Google 规则继续使用后缀匹配。
+          custom_rule = "DOMAIN-SUFFIX,www.google.com"
+          if custom_rule not in seen:
+              rules.append(custom_rule)
+
+          Path("ai-rules.list").write_text("\n".join(rules) + "\n", encoding="utf-8")
+          print(f"过滤后规则数量：{len(rules)}")
 
       - name: Generate ai.list
         run: |
-          awk '{print "DOMAIN-SUFFIX," $0}' ai-domain.list > ai.list
+          cp ai-rules.list ai.list
 
           echo "ai.list 前 20 行："
           head -n 20 ai.list
@@ -50,7 +93,7 @@ jobs:
         run: |
           {
             echo "payload:"
-            awk '{print "  - DOMAIN-SUFFIX," $0}' ai-domain.list
+            sed 's/^/  - /' ai-rules.list
           } > ai.yaml
 
           echo "ai.yaml 前 20 行："
@@ -58,7 +101,7 @@ jobs:
 
       - name: Commit and push
         run: |
-          rm -f ai-source.list ai-domain.list
+          rm -f ai-source.list ai-rules.list
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
