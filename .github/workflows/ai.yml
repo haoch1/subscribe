@@ -74,8 +74,8 @@ jobs:
           if not rules:
               raise SystemExit("上游规则过滤后为空，停止更新。")
 
-          # 自定义 Google 规则继续使用后缀匹配。
-          custom_rule = "DOMAIN-SUFFIX,www.google.com"
+          # 自定义 Google 规则仅精确匹配 www.google.com。
+          custom_rule = "DOMAIN,www.google.com"
           if custom_rule not in seen:
               rules.append(custom_rule)
 
