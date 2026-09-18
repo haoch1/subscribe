@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      3.5.9
+// @version      3.5.10
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -46,7 +46,7 @@
             box-sizing: border-box !important; position: relative !important;
             left: auto !important; right: auto !important; transform: none !important;
         }
-        :where(.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, .lowerboard-placeholder, [data-ad-slot="true"], [data-pogo="top"], [data-pogo="main"], [data-pogo="footer"], #stnext_leaderboard, #results_stnext_leaderboard, #stnext_lowerboard, #stnext_footer) {
+        :where(.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, .lowerboard-placeholder, [data-ad-slot="true"], [data-pogo="top"], [data-pogo="main"], [data-pogo="footer"], #stnext_leaderboard, #results_stnext_leaderboard, #stnext_lowerboard, #stnext_footer, #target-section, footer, [data-view-instance-placeholder="lowerContent"]) {
             display: none !important;
         }
         body[${MODE}] { padding-top: var(--stp-header-height, 0px) !important; }
