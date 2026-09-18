@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      3.5.2
+// @version      3.5.3
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -92,7 +92,7 @@
                 if (/(download|下载|下載)/i.test(value) && /(upload|上传|上傳)/i.test(value) && /(ping|延迟|延遲)/i.test(value)) return candidate;
             }
         }
-        const direct = document.querySelector('.pure-u-custom-speedtest') || document.querySelector(PANEL);
+        const direct = document.querySelector(PANEL);
         if (direct && !direct.matches(SELECT)) return direct;
         const go = findControl(document, START), single = findControl(document, SINGLE);
         for (let candidate = go?.parentElement; candidate && candidate !== document.body; candidate = candidate.parentElement) {
@@ -171,11 +171,10 @@
             singleTries++;
             control.click();
             if (!states.some(value => value !== null) && !radio?.matches('input')) singleDone = true;
-            else setTimeout(schedule, 350 * 2 ** (singleTries - 1)); // 有限退避重试，等待事件处理器就绪。
+            else setTimeout(schedule, 350 * 2 ** (singleTries - 1));
         }
     }
 
-    // 候选地址再校验；URL 仅解析 IPv6，不会发出网络请求。
     const IP = /(?<![\w:.])(?:[\da-f]*:){2,}[\da-f:.]*(?:%[\w.-]+)?(?![\w:.])|(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\w.])/gi;
     function maskIP(address) {
         if (!address.includes(':')) {
@@ -218,11 +217,10 @@
     }
 
     function getPhase() {
-        const value = norm(root.innerText); // 进入页面时的服务器预选阶段仍应允许先切到单线程。
+        const value = norm(root.innerText);
         if (/finding optimal server|finding best server|selecting (?:the )?best server|正在寻找|寻找最佳服务器|正在选择/i.test(value)) return 'preflight';
         const running = all('[aria-label*="cancel" i], [aria-label*="stop" i], [data-testid*="cancel" i], [data-testid*="running" i], [class*="testing" i], [class*="running" i], [aria-busy="true"]', root);
         if (/^(running|testing)$/.test(root.getAttribute('data-state') || '') || [...running].some(visible)) return 'running';
-        // 仅采集可见内容，避免隐藏的结果模板误判。
         if (/finding optimal server|\btesting\b|测试中|测速中|正在测速|正在寻找/i.test(value)) return 'running';
         if (resultPage()) return 'finished';
         const metrics = /(download|下载|下載)/i.test(value) && /(upload|上传|上傳)/i.test(value) && /(?:\d[\d.,]*\s*(?:[kmg]?bps|兆比特)|[kmg]?bps\s*\d)/i.test(value);
@@ -274,7 +272,6 @@
         if (!(next instanceof HTMLElement) || next === document.body || next === document.documentElement) return;
         if (next !== root) {
             root = next; layoutDirty = contentDirty = true; pending.add(root);
-            // 只在主区域变更时通知站点重算图表尺寸，不随测速数字反复触发。
             requestAnimationFrame(() => {
                 internalResize = true;
                 window.dispatchEvent(new Event('resize'));
@@ -289,7 +286,6 @@
         for (const scope of pending) if (scope.isConnected && root.contains(scope)) scan(scope);
         pending.clear();
         renderIPs();
-        // 只在全部同步写入结束后过滤自己的记录，不断开观察器或丢弃站点记录。
         collect(observer.takeRecords());
         selectSingle();
     }
@@ -320,7 +316,6 @@
             schedule();
         }, { passive: true });
     }
-    // 捕获没有 DOM 变化的站内路由切换；不改写 history 方法。
     window.navigation?.addEventListener('navigatesuccess', schedule);
     flush();
 })();
