@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      3.5.10
+// @version      4.0.0
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -17,7 +17,7 @@
     if (document.getElementById(ID)) return;
 
     const ROOT = 'data-stp-root', PATH = 'data-stp-path', KEEP = 'data-stp-keep';
-    const HIDE = 'data-stp-hide', TOP = 'data-stp-top', MODE = 'data-stp-mode';
+    const HIDE = 'data-stp-hide', TOP = 'data-stp-top', CONTENT_TOP = 'data-stp-content-top', MODE = 'data-stp-mode';
     const IP_MARK = 'data-stp-ip', IP_TIP = 'data-stp-ip-tip';
     const SELECT = 'button, [role="button"], label, a, [tabindex]';
     const SINGLE = /^(单一|單一|单一连接|單一連線|single(?: connection)?)$/i;
@@ -27,6 +27,7 @@
     const TOP_CONTROL = '[aria-haspopup="menu"], [aria-label*="menu" i], [aria-label*="language" i], [aria-label*="download" i], [aria-label*="菜单"], [aria-label*="语言"], [aria-label*="下载"], [data-testid*="menu" i], [data-testid*="language" i], [data-testid*="download" i]';
     const POPUP = '[role="menu"], [role="listbox"], [role="dialog"], dialog, [aria-modal="true"], [data-popper-placement], [data-radix-popper-content-wrapper], [data-testid*="menu" i], [data-testid*="dropdown" i], [aria-label*="menu" i]:not(button), [class*="dropdown" i], [class*="popover" i]';
     const LINKS = 'a[href*="/about/" i], a[href*="/apps/" i], a[href="/global-index"], a[href="/performance"], a[href*="downdetector" i], a[href*="ookla.com" i]';
+    const TRACKING = /^(?:_gl|_ga|_up|gclid|dclid|fbclid|msclkid|utm_[^=]+)$/i;
     const ADS = '.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, .lowerboard-placeholder, [data-ad-slot="true"], [data-pogo="top"], [data-pogo="main"], [data-pogo="footer"], #stnext_leaderboard, #results_stnext_leaderboard, #stnext_lowerboard, #stnext_footer, [class*="downdetector" i], [id*="downdetector" i], [class*="advert" i], [class*="promo" i], [role="contentinfo"], iframe, video, footer';
     const SKIP = 'script, style, noscript, textarea, input, select, pre, code, [contenteditable]:not([contenteditable="false"])';
     const norm = value => (value || '').replace(/\s+/g, ' ').trim();
@@ -67,6 +68,10 @@
         body[${MODE}] [${PATH}] > :not([${PATH}], [${ROOT}], [${KEEP}], script, style, link),
         [${ROOT}] :is(${ADS}, ${LINKS}), [${HIDE}] { display: none !important; }
         [${TOP}] { z-index: 20 !important; }
+        [${CONTENT_TOP}] {
+            position: sticky !important; top: var(--stp-header-height, 0px) !important;
+            z-index: 19 !important; background: #000 !important;
+        }
         [${IP_MARK}] { position: relative !important; cursor: pointer !important; }
         [${IP_MARK}]::after {
             content: attr(${IP_TIP}); position: absolute; left: 50%; bottom: calc(100% + 8px);
@@ -134,6 +139,26 @@
         if (document.body.style.getPropertyValue('--stp-header-height') !== value) document.body.style.setProperty('--stp-header-height', value);
     }
 
+    function cleanLink(link) {
+        if (!(link instanceof HTMLAnchorElement)) return;
+        const raw = link.getAttribute('href');
+        if (!raw || /^(?:#|javascript:|mailto:|tel:|data:)/i.test(raw)) return;
+        try {
+            const url = new URL(raw, location.href);
+            if (url.origin !== location.origin) return;
+            let changed = false;
+            for (const key of [...url.searchParams.keys()]) {
+                if (TRACKING.test(key)) { url.searchParams.delete(key); changed = true; }
+            }
+            if (changed) link.setAttribute('href', `${url.pathname}${url.search ? `?${url.searchParams}` : ''}${url.hash}`);
+        } catch {}
+    }
+
+    function cleanLinks(scope = document) {
+        if (scope instanceof HTMLAnchorElement) cleanLink(scope);
+        for (const link of all('a[href]', scope)) cleanLink(link);
+    }
+
     function isolate() {
         clearLayout();
         mark(root, ROOT, resultPage() ? 'result' : '');
@@ -150,6 +175,9 @@
                 }
             }
         }
+        const controls = all('a[href="/results"], a[href="/settings"]', root);
+        const controlRows = new Set([...controls].map(link => link.parentElement).filter(row => row && row !== root));
+        for (const row of controlRows) mark(row, CONTENT_TOP);
         for (let panel of all(POPUP)) {
             if (root.contains(panel) || panel === document.body || panel.contains(root)) continue;
             while (panel.parentElement && panel.parentElement !== document.body && !panel.parentElement.hasAttribute(PATH)) panel = panel.parentElement;
@@ -293,6 +321,7 @@
     function flush() {
         timer = null;
         lastRun = performance.now();
+        cleanLinks();
         if (route !== location.pathname || (root && !root.isConnected)) {
             renderIPs(true);
             clearLayout();
@@ -344,7 +373,7 @@
 
     observer.observe(document.documentElement, {
         subtree: true, childList: true, characterData: true, attributes: true,
-        attributeFilter: ['class', 'hidden', 'aria-hidden', 'aria-pressed', 'aria-checked', 'aria-busy', 'aria-disabled', 'disabled', 'data-state']
+        attributeFilter: ['class', 'href', 'hidden', 'aria-hidden', 'aria-pressed', 'aria-checked', 'aria-busy', 'aria-disabled', 'disabled', 'data-state']
     });
     document.addEventListener('click', event => {
         const target = event.target instanceof Element ? event.target : event.target?.parentElement;
@@ -362,6 +391,11 @@
                 break;
             }
         }
+    }, true);
+    document.addEventListener('contextmenu', event => {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        const link = target?.closest('a[href]');
+        if (link) cleanLink(link);
     }, true);
     for (const name of ['popstate', 'hashchange', 'pageshow', 'resize']) {
         window.addEventListener(name, () => {
