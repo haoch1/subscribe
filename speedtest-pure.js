@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      4.0.0
+// @version      4.0.1
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -175,8 +175,17 @@
                 }
             }
         }
-        const controls = all('a[href="/results"], a[href="/settings"]', root);
-        const controlRows = new Set([...controls].map(link => link.parentElement).filter(row => row && row !== root));
+        const controls = [...all('a[href="/results"], a[href="/settings"]', root)];
+        const controlRows = new Set();
+        for (const link of controls) {
+            let row = null;
+            for (let current = link.parentElement; current && current !== root; current = current.parentElement) {
+                const computed = getComputedStyle(current);
+                if (computed.display === 'flex' && computed.flexDirection === 'row') row = current;
+                else if (row) break;
+            }
+            if (row) controlRows.add(row);
+        }
         for (const row of controlRows) mark(row, CONTENT_TOP);
         for (let panel of all(POPUP)) {
             if (root.contains(panel) || panel === document.body || panel.contains(root)) continue;
