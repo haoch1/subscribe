@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      3.5.0
+// @version      3.5.1
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -59,7 +59,7 @@
     (document.head || document.documentElement).append(style);
 
     let root = null, route = location.pathname, phase = 'idle', revealed = false;
-    let layoutDirty = true, contentDirty = true, timer = null, lastRun = -Infinity;
+    let layoutDirty = true, contentDirty = true, timer = null, lastRun = -Infinity, internalResize = false;
     let singleDone = false, singleTries = 0, singleAt = -Infinity;
     const marks = new Map(), ipNodes = new Map(), pending = new Set();
 
@@ -221,7 +221,8 @@
 
     function schedule() {
         if (timer !== null) return;
-        timer = setTimeout(flush, Math.max(0, 120 - (performance.now() - lastRun)));
+        const delay = root ? Math.max(0, 120 - (performance.now() - lastRun)) : 0;
+        timer = setTimeout(flush, delay);
     }
 
     function collect(records) {
@@ -263,7 +264,11 @@
         if (next !== root) {
             root = next; layoutDirty = contentDirty = true; pending.add(root);
             // 只在主区域变更时通知站点重算图表尺寸，不随测速数字反复触发。
-            requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+            requestAnimationFrame(() => {
+                internalResize = true;
+                window.dispatchEvent(new Event('resize'));
+                internalResize = false;
+            });
         }
         if (layoutDirty) { isolate(); layoutDirty = false; }
         if (contentDirty) { hidePromotions(); contentDirty = false; }
@@ -298,7 +303,11 @@
         }
     }, true);
     for (const name of ['popstate', 'hashchange', 'pageshow', 'resize']) {
-        window.addEventListener(name, () => { layoutDirty = true; schedule(); }, { passive: true });
+        window.addEventListener(name, () => {
+            if (name === 'resize' && internalResize) return;
+            layoutDirty = true;
+            schedule();
+        }, { passive: true });
     }
     // 捕获没有 DOM 变化的站内路由切换；不改写 history 方法。
     window.navigation?.addEventListener('navigatesuccess', schedule);
