@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      4.0.1
+// @version      4.0.2
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -17,7 +17,7 @@
     if (document.getElementById(ID)) return;
 
     const ROOT = 'data-stp-root', PATH = 'data-stp-path', KEEP = 'data-stp-keep';
-    const HIDE = 'data-stp-hide', TOP = 'data-stp-top', CONTENT_TOP = 'data-stp-content-top', MODE = 'data-stp-mode';
+    const HIDE = 'data-stp-hide', TOP = 'data-stp-top', MODE = 'data-stp-mode';
     const IP_MARK = 'data-stp-ip', IP_TIP = 'data-stp-ip-tip';
     const SELECT = 'button, [role="button"], label, a, [tabindex]';
     const SINGLE = /^(单一|單一|单一连接|單一連線|single(?: connection)?)$/i;
@@ -68,10 +68,6 @@
         body[${MODE}] [${PATH}] > :not([${PATH}], [${ROOT}], [${KEEP}], script, style, link),
         [${ROOT}] :is(${ADS}, ${LINKS}), [${HIDE}] { display: none !important; }
         [${TOP}] { z-index: 20 !important; }
-        [${CONTENT_TOP}] {
-            position: sticky !important; top: var(--stp-header-height, 0px) !important;
-            z-index: 19 !important; background: #000 !important;
-        }
         [${IP_MARK}] { position: relative !important; cursor: pointer !important; }
         [${IP_MARK}]::after {
             content: attr(${IP_TIP}); position: absolute; left: 50%; bottom: calc(100% + 8px);
@@ -175,18 +171,6 @@
                 }
             }
         }
-        const controls = [...all('a[href="/results"], a[href="/settings"]', root)];
-        const controlRows = new Set();
-        for (const link of controls) {
-            let row = null;
-            for (let current = link.parentElement; current && current !== root; current = current.parentElement) {
-                const computed = getComputedStyle(current);
-                if (computed.display === 'flex' && computed.flexDirection === 'row') row = current;
-                else if (row) break;
-            }
-            if (row) controlRows.add(row);
-        }
-        for (const row of controlRows) mark(row, CONTENT_TOP);
         for (let panel of all(POPUP)) {
             if (root.contains(panel) || panel === document.body || panel.contains(root)) continue;
             while (panel.parentElement && panel.parentElement !== document.body && !panel.parentElement.hasAttribute(PATH)) panel = panel.parentElement;
