@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      3.5.5
+// @version      3.5.6
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -18,6 +18,7 @@
 
     const ROOT = 'data-stp-root', PATH = 'data-stp-path', KEEP = 'data-stp-keep';
     const HIDE = 'data-stp-hide', TOP = 'data-stp-top', MODE = 'data-stp-mode';
+    const IP_MARK = 'data-stp-ip', IP_TIP = 'data-stp-ip-tip';
     const SELECT = 'button, [role="button"], label, a, [tabindex]';
     const SINGLE = /^(单一|單一|单一连接|單一連線|single(?: connection)?)$/i;
     const START = /^(go|start|开始|開始)$/i;
@@ -66,6 +67,14 @@
         body[${MODE}] [${PATH}] > :not([${PATH}], [${ROOT}], [${KEEP}], script, style, link),
         [${ROOT}] :is(${ADS}, ${LINKS}), [${HIDE}] { display: none !important; }
         [${TOP}] { z-index: 20 !important; }
+        [${IP_MARK}] { position: relative !important; cursor: pointer !important; }
+        [${IP_MARK}]::after {
+            content: attr(${IP_TIP}); position: absolute; left: 50%; bottom: calc(100% + 8px);
+            z-index: 100; padding: 5px 9px; border: 1px solid #222; background: #fff; color: #111;
+            font: 14px/1.2 Arial, sans-serif; white-space: nowrap; transform: translateX(-50%);
+            visibility: hidden; opacity: 0; pointer-events: none; transition: opacity .12s ease;
+        }
+        [${IP_MARK}]:hover::after { visibility: visible; opacity: 1; }
     `;
     (document.head || document.documentElement).append(style);
 
@@ -189,13 +198,30 @@
         } catch { return address; }
     }
 
+    function clearIPMark(host, except = null) {
+        if (!host) return;
+        for (const [node, record] of ipNodes) if (node !== except && record.host === host) return;
+        host.removeAttribute(IP_MARK);
+        host.removeAttribute(IP_TIP);
+    }
+
     function remember(node) {
-        if (!node.parentElement || node.parentElement.closest(SKIP)) return;
+        const host = node.parentElement;
+        if (!host || host.closest(SKIP)) return;
         const raw = node.data, previous = ipNodes.get(node);
-        if (previous?.shown === raw) return;
+        if (previous?.shown === raw) {
+            host.setAttribute(IP_MARK, '');
+            return;
+        }
         const masked = raw.replace(IP, maskIP);
-        if (raw !== masked) ipNodes.set(node, { raw, masked, shown: raw });
-        else ipNodes.delete(node);
+        if (raw !== masked) {
+            if (previous?.host && previous.host !== host) clearIPMark(previous.host, node);
+            ipNodes.set(node, { raw, masked, shown: raw, host });
+            host.setAttribute(IP_MARK, '');
+        } else {
+            ipNodes.delete(node);
+            clearIPMark(previous?.host || host);
+        }
     }
 
     function scan(scope) {
@@ -204,15 +230,21 @@
         while (walker.nextNode()) remember(walker.currentNode);
     }
 
-    function renderIPs(hide = phase !== 'idle' && !revealed) {
+    function renderIPs(hide = !revealed) {
         for (const [node, saved] of ipNodes) {
-            if (!node.isConnected || !root?.contains(node)) { ipNodes.delete(node); continue; }
+            if (!node.isConnected || !root?.contains(node)) {
+                ipNodes.delete(node);
+                clearIPMark(saved.host);
+                continue;
+            }
             if (node.data !== saved.shown) remember(node);
             const record = ipNodes.get(node);
             if (!record) continue;
             const value = hide ? record.masked : record.raw;
             if (node.data !== value) node.data = value;
             record.shown = value;
+            record.host.setAttribute(IP_MARK, '');
+            record.host.setAttribute(IP_TIP, hide ? '点击显示 IP' : '点击隐藏 IP');
         }
     }
 
@@ -260,9 +292,13 @@
         timer = null;
         lastRun = performance.now();
         if (route !== location.pathname || (root && !root.isConnected)) {
-            renderIPs(false);
+            renderIPs(true);
             clearLayout();
             root = null; phase = 'idle'; revealed = false;
+            for (const record of ipNodes.values()) {
+                record.host.removeAttribute(IP_MARK);
+                record.host.removeAttribute(IP_TIP);
+            }
             ipNodes.clear(); pending.clear();
             route = location.pathname;
             singleDone = false; singleTries = 0; singleAt = -Infinity;
@@ -283,7 +319,6 @@
         const detected = getPhase();
         const nextPhase = detected === 'idle' && phase === 'finished' ? phase : detected;
         if (nextPhase !== phase) {
-            revealed = false;
             phase = nextPhase;
             if (phase === 'finished') pending.add(root);
         }
@@ -303,7 +338,7 @@
         if (!target) return;
         if (event.isTrusted && target.closest('[data-testid="test-mode-toggle"]')) singleDone = true;
         if (target.closest(TOP_CONTROL)) { layoutDirty = true; schedule(); }
-        if (phase !== 'finished' || !root?.contains(target) || target.closest('a, button, input, textarea, select, [role="button"]')) return;
+        if (!root?.contains(target) || target.closest('a, button, input, textarea, select, [role="button"]')) return;
         for (const [node, record] of ipNodes) {
             const targetText = text(target);
             if (target.contains(node) && (targetText.includes(record.raw) || targetText.includes(record.masked))) {
