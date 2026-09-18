@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      3.5.8
+// @version      3.5.9
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -27,7 +27,7 @@
     const TOP_CONTROL = '[aria-haspopup="menu"], [aria-label*="menu" i], [aria-label*="language" i], [aria-label*="download" i], [aria-label*="菜单"], [aria-label*="语言"], [aria-label*="下载"], [data-testid*="menu" i], [data-testid*="language" i], [data-testid*="download" i]';
     const POPUP = '[role="menu"], [role="listbox"], [role="dialog"], dialog, [aria-modal="true"], [data-popper-placement], [data-radix-popper-content-wrapper], [data-testid*="menu" i], [data-testid*="dropdown" i], [aria-label*="menu" i]:not(button), [class*="dropdown" i], [class*="popover" i]';
     const LINKS = 'a[href*="/about/" i], a[href*="/apps/" i], a[href="/global-index"], a[href="/performance"], a[href*="downdetector" i], a[href*="ookla.com" i]';
-    const ADS = '.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, [data-ad-slot="true"], [data-pogo="top"], #stnext_leaderboard, #results_stnext_leaderboard, [class*="downdetector" i], [id*="downdetector" i], [class*="advert" i], [class*="promo" i], [role="contentinfo"], iframe, video, footer';
+    const ADS = '.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, .lowerboard-placeholder, [data-ad-slot="true"], [data-pogo="top"], [data-pogo="main"], [data-pogo="footer"], #stnext_leaderboard, #results_stnext_leaderboard, #stnext_lowerboard, #stnext_footer, [class*="downdetector" i], [id*="downdetector" i], [class*="advert" i], [class*="promo" i], [role="contentinfo"], iframe, video, footer';
     const SKIP = 'script, style, noscript, textarea, input, select, pre, code, [contenteditable]:not([contenteditable="false"])';
     const norm = value => (value || '').replace(/\s+/g, ' ').trim();
     const text = element => norm(element?.textContent);
@@ -46,7 +46,7 @@
             box-sizing: border-box !important; position: relative !important;
             left: auto !important; right: auto !important; transform: none !important;
         }
-        :where(.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, [data-ad-slot="true"], [data-pogo="top"], #stnext_leaderboard, #results_stnext_leaderboard) {
+        :where(.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, .lowerboard-placeholder, [data-ad-slot="true"], [data-pogo="top"], [data-pogo="main"], [data-pogo="footer"], #stnext_leaderboard, #results_stnext_leaderboard, #stnext_lowerboard, #stnext_footer) {
             display: none !important;
         }
         body[${MODE}] { padding-top: var(--stp-header-height, 0px) !important; }
