@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      3.5.1
+// @version      3.5.2
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
-// @run-at       document-end
+// @run-at       document-start
 // @grant        none
 // @noframes
 // @license      MIT
@@ -14,7 +14,7 @@
 (() => {
     'use strict';
     const ID = 'speedtest-pure-mode-style';
-    if (document.getElementById(ID) || !document.body) return;
+    if (document.getElementById(ID)) return;
 
     const ROOT = 'data-stp-root', PATH = 'data-stp-path', KEEP = 'data-stp-keep';
     const HIDE = 'data-stp-hide', TOP = 'data-stp-top', MODE = 'data-stp-mode';
@@ -37,6 +37,17 @@
     style.id = ID;
     style.textContent = `
         html, body { margin: 0 !important; }
+        :where(.pure-u-custom-speedtest, #speedtest, .speedtest-app, [data-testid*="speedtest" i]):not([${ROOT}]) {
+            --stp-width: 764px;
+            display: block !important; width: min(100%, var(--stp-width)) !important;
+            max-width: var(--stp-width) !important; min-width: 0 !important;
+            margin: 24px auto 40px !important; float: none !important;
+            box-sizing: border-box !important; position: relative !important;
+            left: auto !important; right: auto !important; transform: none !important;
+        }
+        :where(.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper) {
+            display: none !important;
+        }
         body[${MODE}] { padding-top: var(--stp-header-height, 0px) !important; }
         [${ROOT}] {
             --stp-width: 764px;
