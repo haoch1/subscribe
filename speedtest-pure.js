@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      3.5.6
+// @version      3.5.7
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -78,7 +78,7 @@
     `;
     (document.head || document.documentElement).append(style);
 
-    let root = null, route = location.pathname, phase = 'idle', revealed = false;
+    let root = null, route = location.pathname, phase = 'idle', revealed = false, ipPageScanned = false;
     let layoutDirty = true, contentDirty = true, timer = null, lastRun = -Infinity, internalResize = false;
     let singleDone = false, singleTries = 0, singleAt = -Infinity;
     const marks = new Map(), ipNodes = new Map(), pending = new Set();
@@ -232,7 +232,8 @@
 
     function renderIPs(hide = !revealed) {
         for (const [node, saved] of ipNodes) {
-            if (!node.isConnected || !root?.contains(node)) {
+            const inScope = root?.contains(node) || (resultPage() && document.body?.contains(node));
+            if (!node.isConnected || !inScope) {
                 ipNodes.delete(node);
                 clearIPMark(saved.host);
                 continue;
@@ -273,6 +274,7 @@
             if (!element || element.closest(SKIP)) continue;
             if (record.type === 'characterData' && ipNodes.get(record.target)?.shown === record.target.data) continue;
             const inside = root?.contains(record.target);
+            if (resultPage() && !inside) ipPageScanned = false;
             if (record.type === 'childList') {
                 const structural = [...record.addedNodes, ...record.removedNodes].some(node => node.nodeType === Node.ELEMENT_NODE);
                 if (structural) { contentDirty = true; if (!inside) layoutDirty = true; }
@@ -299,13 +301,20 @@
                 record.host.removeAttribute(IP_MARK);
                 record.host.removeAttribute(IP_TIP);
             }
-            ipNodes.clear(); pending.clear();
+            ipNodes.clear(); pending.clear(); ipPageScanned = false;
             route = location.pathname;
             singleDone = false; singleTries = 0; singleAt = -Infinity;
             layoutDirty = contentDirty = true;
         }
         const next = findRoot();
-        if (!(next instanceof HTMLElement) || next === document.body || next === document.documentElement) return;
+        if (!(next instanceof HTMLElement) || next === document.body || next === document.documentElement) {
+            if (resultPage() && document.body && !ipPageScanned) {
+                scan(document.body);
+                ipPageScanned = ipNodes.size > 0;
+                renderIPs();
+            }
+            return;
+        }
         if (next !== root) {
             root = next; layoutDirty = contentDirty = true; pending.add(root);
             requestAnimationFrame(() => {
@@ -324,6 +333,10 @@
         }
         for (const scope of pending) if (scope.isConnected && root.contains(scope)) scan(scope);
         pending.clear();
+        if (resultPage() && !ipPageScanned && document.body) {
+            scan(document.body);
+            ipPageScanned = ipNodes.size > 0;
+        }
         renderIPs();
         collect(observer.takeRecords());
         selectSingle();
@@ -338,7 +351,8 @@
         if (!target) return;
         if (event.isTrusted && target.closest('[data-testid="test-mode-toggle"]')) singleDone = true;
         if (target.closest(TOP_CONTROL)) { layoutDirty = true; schedule(); }
-        if (!root?.contains(target) || target.closest('a, button, input, textarea, select, [role="button"]')) return;
+        const inScope = root?.contains(target) || (resultPage() && document.body?.contains(target));
+        if (!inScope || target.closest('a, button, input, textarea, select, [role="button"]')) return;
         for (const [node, record] of ipNodes) {
             const targetText = text(target);
             if (target.contains(node) && (targetText.includes(record.raw) || targetText.includes(record.masked))) {
