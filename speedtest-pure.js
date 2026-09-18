@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      3.5.4
+// @version      3.5.5
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -204,7 +204,7 @@
         while (walker.nextNode()) remember(walker.currentNode);
     }
 
-    function renderIPs(hide = phase === 'finished' && !revealed) {
+    function renderIPs(hide = phase !== 'idle' && !revealed) {
         for (const [node, saved] of ipNodes) {
             if (!node.isConnected || !root?.contains(node)) { ipNodes.delete(node); continue; }
             if (node.data !== saved.shown) remember(node);
@@ -219,11 +219,12 @@
     function getPhase() {
         const value = norm(root.innerText);
         if (/finding optimal server|finding best server|selecting (?:the )?best server|正在寻找|寻找最佳服务器|正在选择/i.test(value)) return 'preflight';
+        if (resultPage()) return 'finished';
+        const metrics = /(download|下载|下載)/i.test(value) && /(upload|上传|上傳)/i.test(value) && /(?:\d[\d.,]*\s*(?:[kmg]?bps|兆比特)|[kmg]?bps\s*\d)/i.test(value);
+        if (metrics && /\b(?:result id|share|results|settings|change server|go again)\b|结果\s*id|分享|更换服务器|再次测试|重新测速/i.test(value)) return 'finished';
         const running = all('[aria-label*="cancel" i], [aria-label*="stop" i], [data-testid*="cancel" i], [data-testid*="running" i], [class*="testing" i], [class*="running" i], [aria-busy="true"]', root);
         if (/^(running|testing)$/.test(root.getAttribute('data-state') || '') || [...running].some(visible)) return 'running';
         if (/finding optimal server|\btesting\b|测试中|测速中|正在测速|正在寻找/i.test(value)) return 'running';
-        if (resultPage()) return 'finished';
-        const metrics = /(download|下载|下載)/i.test(value) && /(upload|上传|上傳)/i.test(value) && /(?:\d[\d.,]*\s*(?:[kmg]?bps|兆比特)|[kmg]?bps\s*\d)/i.test(value);
         return metrics ? 'finished' : 'idle';
     }
 
