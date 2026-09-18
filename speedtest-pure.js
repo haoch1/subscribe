@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      3.5.3
+// @version      3.5.4
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
@@ -224,8 +224,7 @@
         if (/finding optimal server|\btesting\b|测试中|测速中|正在测速|正在寻找/i.test(value)) return 'running';
         if (resultPage()) return 'finished';
         const metrics = /(download|下载|下載)/i.test(value) && /(upload|上传|上傳)/i.test(value) && /(?:\d[\d.,]*\s*(?:[kmg]?bps|兆比特)|[kmg]?bps\s*\d)/i.test(value);
-        const evidence = /\bshare\b|分享|go again|再次测试|重新测速/i.test(value) || [...all('a[href*="/result/"], [aria-label*="share" i], [data-testid*="share" i], [aria-label*="分享"]', root)].some(visible);
-        return metrics && evidence ? 'finished' : 'idle';
+        return metrics ? 'finished' : 'idle';
     }
 
     function schedule() {
@@ -282,7 +281,11 @@
         if (contentDirty) { hidePromotions(); contentDirty = false; }
         const detected = getPhase();
         const nextPhase = detected === 'idle' && phase === 'finished' ? phase : detected;
-        if (nextPhase !== phase) { revealed = false; phase = nextPhase; }
+        if (nextPhase !== phase) {
+            revealed = false;
+            phase = nextPhase;
+            if (phase === 'finished') pending.add(root);
+        }
         for (const scope of pending) if (scope.isConnected && root.contains(scope)) scan(scope);
         pending.clear();
         renderIPs();
@@ -301,7 +304,8 @@
         if (target.closest(TOP_CONTROL)) { layoutDirty = true; schedule(); }
         if (phase !== 'finished' || !root?.contains(target) || target.closest('a, button, input, textarea, select, [role="button"]')) return;
         for (const [node, record] of ipNodes) {
-            if (target.contains(node) && text(target) === norm(record.shown)) {
+            const targetText = text(target);
+            if (target.contains(node) && (targetText.includes(record.raw) || targetText.includes(record.masked))) {
                 revealed = !revealed;
                 renderIPs();
                 collect(observer.takeRecords());
