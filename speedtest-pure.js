@@ -207,9 +207,11 @@
     }
 
     function getPhase() {
+        const value = norm(root.innerText); // 进入页面时的服务器预选阶段仍应允许先切到单线程。
+        if (/finding optimal server|finding best server|selecting (?:the )?best server|正在寻找|寻找最佳服务器|正在选择/i.test(value)) return 'preflight';
         const running = all('[aria-label*="cancel" i], [aria-label*="stop" i], [data-testid*="cancel" i], [data-testid*="running" i], [class*="testing" i], [class*="running" i], [aria-busy="true"]', root);
         if (/^(running|testing)$/.test(root.getAttribute('data-state') || '') || [...running].some(visible)) return 'running';
-        const value = norm(root.innerText); // 仅采集可见内容，避免隐藏的结果模板误判。
+        // 仅采集可见内容，避免隐藏的结果模板误判。
         if (/finding optimal server|\btesting\b|测试中|测速中|正在测速|正在寻找/i.test(value)) return 'running';
         if (resultPage()) return 'finished';
         const metrics = /(download|下载|下載)/i.test(value) && /(upload|上传|上傳)/i.test(value) && /(?:\d[\d.,]*\s*(?:[kmg]?bps|兆比特)|[kmg]?bps\s*\d)/i.test(value);
