@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      4.0.5
+// @version      4.0.6
 // @icon         https://www.speedtest.net/favicon.ico
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
@@ -136,7 +136,7 @@
         if (!root) return;
         let height = 0;
         for (const banner of all(`[${TOP}], [${TOP}] header, [${TOP}] [role="banner"]`)) {
-            if (visible(banner) && /^(fixed|absolute)$/.test(getComputedStyle(banner).position)) {
+            if (banner.getClientRects().length && /^(fixed|absolute)$/.test(getComputedStyle(banner).position)) {
                 height = Math.max(height, Math.ceil(banner.getBoundingClientRect().bottom));
             }
         }
@@ -166,7 +166,7 @@
 
     function syncServerDialog() {
         for (const element of all(`[${SERVER_DIALOG}]`)) element.removeAttribute(SERVER_DIALOG);
-        const panels = root ? [...all('[role="dialog"]', root)].filter(visible) : [];
+        const panels = root ? [...all('[role="dialog"]', root)].filter(panel => panel.getClientRects().length > 0) : [];
         const open = panels.length > 0;
         if (!open) {
             serverDialogOpen = false;
