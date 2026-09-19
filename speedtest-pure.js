@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      4.0.6
+// @version      4.0.7
 // @icon         https://www.speedtest.net/favicon.ico
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
@@ -165,18 +165,20 @@
     }
 
     function syncServerDialog() {
-        for (const element of all(`[${SERVER_DIALOG}]`)) element.removeAttribute(SERVER_DIALOG);
         const panels = root ? [...all('[role="dialog"]', root)].filter(panel => panel.getClientRects().length > 0) : [];
+        const dialogs = new Set(panels.map(panel => panel.closest('.MuiDialog-root')).filter(Boolean));
+        for (const element of all(`[${SERVER_DIALOG}]`)) {
+            if (dialogs.has(element)) continue;
+            element.removeAttribute(SERVER_DIALOG);
+            marks.get(element)?.delete(SERVER_DIALOG);
+        }
         const open = panels.length > 0;
         if (!open) {
             serverDialogOpen = false;
             serverDialogScrollY = null;
             return;
         }
-        for (const panel of panels) {
-            const dialog = panel.closest('.MuiDialog-root');
-            if (dialog) mark(dialog, SERVER_DIALOG);
-        }
+        for (const dialog of dialogs) mark(dialog, SERVER_DIALOG);
         if (!serverDialogOpen) serverDialogOpen = true;
         if (serverDialogScrollY === null) serverDialogScrollY = window.scrollY;
         if (Math.abs(window.scrollY - serverDialogScrollY) > 1) {
