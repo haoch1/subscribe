@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      4.0.4
+// @version      4.0.5
 // @icon         https://www.speedtest.net/favicon.ico
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
@@ -18,7 +18,7 @@
     if (document.getElementById(ID)) return;
 
     const ROOT = 'data-stp-root', PATH = 'data-stp-path', KEEP = 'data-stp-keep';
-    const HIDE = 'data-stp-hide', TOP = 'data-stp-top', MODE = 'data-stp-mode';
+    const HIDE = 'data-stp-hide', TOP = 'data-stp-top', SERVER_DIALOG = 'data-stp-server-dialog', MODE = 'data-stp-mode';
     const IP_MARK = 'data-stp-ip', IP_TIP = 'data-stp-ip-tip';
     const SELECT = 'button, [role="button"], label, a, [tabindex]';
     const SINGLE = /^(单一|單一|单一连接|單一連線|single(?: connection)?)$/i;
@@ -51,7 +51,10 @@
         :where(.pure-u-custom-ad-skyscraper, .pure-u-custom-ad-rectangle, .eot-box-wrapper, .top-placeholder, .lowerboard-placeholder, [data-ad-slot="true"], [data-pogo="top"], [data-pogo="main"], [data-pogo="footer"], #stnext_leaderboard, #results_stnext_leaderboard, #stnext_lowerboard, #stnext_footer, #target-section, footer, [data-view-instance-placeholder="lowerContent"]) {
             display: none !important;
         }
-        body[${MODE}] { padding-top: var(--stp-header-height, 0px) !important; }
+        body[${MODE}] {
+            padding-top: var(--stp-header-height, 0px) !important;
+            scrollbar-gutter: stable !important; overflow-anchor: none !important;
+        }
         [${ROOT}] {
             --stp-width: 764px;
             display: block !important; width: min(100%, var(--stp-width)) !important;
@@ -69,7 +72,7 @@
         body[${MODE}] [${PATH}] > :not([${PATH}], [${ROOT}], [${KEEP}], script, style, link),
         [${ROOT}] :is(${ADS}, ${LINKS}), [${HIDE}] { display: none !important; }
         [${TOP}] { z-index: 20 !important; }
-        [${ROOT}] .MuiDialog-root {
+        [${ROOT}] .MuiDialog-root, [${SERVER_DIALOG}] {
             top: calc(var(--stp-header-height, 0px) + 2px) !important;
             bottom: 0 !important;
         }
@@ -87,6 +90,7 @@
     let root = null, route = location.pathname, phase = 'idle', revealed = false, ipPageScanned = false;
     let layoutDirty = true, contentDirty = true, timer = null, lastRun = -Infinity, internalResize = false;
     let singleDone = false, singleTries = 0, singleAt = -Infinity;
+    let serverDialogOpen = false, serverDialogScrollY = null, restoringScroll = false;
     const marks = new Map(), ipNodes = new Map(), pending = new Set();
 
     function findControl(scope, pattern) {
@@ -158,6 +162,28 @@
     function cleanLinks(scope = document) {
         if (scope instanceof HTMLAnchorElement) cleanLink(scope);
         for (const link of all('a[href]', scope)) cleanLink(link);
+    }
+
+    function syncServerDialog() {
+        for (const element of all(`[${SERVER_DIALOG}]`)) element.removeAttribute(SERVER_DIALOG);
+        const panels = root ? [...all('[role="dialog"]', root)].filter(visible) : [];
+        const open = panels.length > 0;
+        if (!open) {
+            serverDialogOpen = false;
+            serverDialogScrollY = null;
+            return;
+        }
+        for (const panel of panels) {
+            const dialog = panel.closest('.MuiDialog-root');
+            if (dialog) mark(dialog, SERVER_DIALOG);
+        }
+        if (!serverDialogOpen) serverDialogOpen = true;
+        if (serverDialogScrollY === null) serverDialogScrollY = window.scrollY;
+        if (Math.abs(window.scrollY - serverDialogScrollY) > 1) {
+            restoringScroll = true;
+            window.scrollTo(0, serverDialogScrollY);
+            restoringScroll = false;
+        }
     }
 
     function isolate() {
@@ -331,10 +357,13 @@
             ipNodes.clear(); pending.clear(); ipPageScanned = false;
             route = location.pathname;
             singleDone = false; singleTries = 0; singleAt = -Infinity;
+            serverDialogOpen = false; serverDialogScrollY = null;
             layoutDirty = contentDirty = true;
         }
         const next = findRoot();
         if (!(next instanceof HTMLElement) || next === document.body || next === document.documentElement) {
+            serverDialogOpen = false;
+            serverDialogScrollY = null;
             if (resultPage() && document.body && !ipPageScanned) {
                 scan(document.body);
                 ipPageScanned = ipNodes.size > 0;
@@ -351,6 +380,7 @@
             });
         }
         if (layoutDirty) { isolate(); layoutDirty = false; }
+        syncServerDialog();
         if (contentDirty) { hidePromotions(); contentDirty = false; }
         const detected = getPhase();
         const nextPhase = detected === 'idle' && phase === 'finished' ? phase : detected;
@@ -376,6 +406,8 @@
     document.addEventListener('click', event => {
         const target = event.target instanceof Element ? event.target : event.target?.parentElement;
         if (!target) return;
+        const button = target.closest('button, [role="button"]');
+        if (button && /(?:change server|更换服务器|更換伺服器)/i.test(text(button))) serverDialogScrollY = window.scrollY;
         if (event.isTrusted && target.closest('[data-testid="test-mode-toggle"]')) singleDone = true;
         if (target.closest(TOP_CONTROL)) { layoutDirty = true; schedule(); }
         const inScope = root?.contains(target) || (resultPage() && document.body?.contains(target));
@@ -402,6 +434,13 @@
             schedule();
         }, { passive: true });
     }
+    window.addEventListener('scroll', () => {
+        if (!restoringScroll && serverDialogOpen && serverDialogScrollY !== null && Math.abs(window.scrollY - serverDialogScrollY) > 1) {
+            restoringScroll = true;
+            window.scrollTo(0, serverDialogScrollY);
+            restoringScroll = false;
+        }
+    }, { passive: true });
     window.navigation?.addEventListener('navigatesuccess', schedule);
     flush();
 })();
