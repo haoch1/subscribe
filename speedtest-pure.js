@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      4.0.3
+// @version      4.0.4
 // @icon         https://www.speedtest.net/favicon.ico
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
@@ -69,6 +69,10 @@
         body[${MODE}] [${PATH}] > :not([${PATH}], [${ROOT}], [${KEEP}], script, style, link),
         [${ROOT}] :is(${ADS}, ${LINKS}), [${HIDE}] { display: none !important; }
         [${TOP}] { z-index: 20 !important; }
+        [${ROOT}] .MuiDialog-root {
+            top: calc(var(--stp-header-height, 0px) + 2px) !important;
+            bottom: 0 !important;
+        }
         [${IP_MARK}] { position: relative !important; cursor: pointer !important; }
         [${IP_MARK}]::after {
             content: attr(${IP_TIP}); position: absolute; left: 50%; bottom: calc(100% + 8px);
