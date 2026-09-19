@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    https://www.speedtest.net/
-// @version      4.0.9
+// @version      1.0.0
 // @icon         https://www.speedtest.net/favicon.ico
-// @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
+// @description  精简测速界面，默认单连接；IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
 // @match        https://speedtest.net/*
 // @run-at       document-start
