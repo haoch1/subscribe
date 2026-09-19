@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Speedtest Pure
 // @namespace    local.speedtest.center
-// @version      4.0.7
+// @version      4.0.8
 // @icon         https://www.speedtest.net/favicon.ico
 // @description  精简测速界面，默认单连接；结果 IP 点击显示/隐藏，支持 IPv4/IPv6
 // @match        https://www.speedtest.net/*
@@ -414,9 +414,10 @@
         if (target.closest(TOP_CONTROL)) { layoutDirty = true; schedule(); }
         const inScope = root?.contains(target) || (resultPage() && document.body?.contains(target));
         if (!inScope || target.closest('a, button, input, textarea, select, [role="button"]')) return;
+        const ipHost = target.closest(`[${IP_MARK}]`);
+        if (!ipHost) return;
         for (const [node, record] of ipNodes) {
-            const targetText = text(target);
-            if (target.contains(node) && (targetText.includes(record.raw) || targetText.includes(record.masked))) {
+            if (record.host === ipHost && ipHost.contains(node)) {
                 revealed = !revealed;
                 renderIPs();
                 collect(observer.takeRecords());
